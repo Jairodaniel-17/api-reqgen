@@ -1,37 +1,44 @@
+"""
+Usa esto para buscar en una base de datos vectorial, sin embargo te recomiendo que uses una base de datos SQL o no sql para almacenar las conversaciones. 
+"""
+
 from langchain.agents import tool
-from langchain.globals import set_verbose
+import requests
+import os
+from dotenv import load_dotenv
+from urllib.parse import urljoin
 
-from database_vectorial.model_db import VectorialDB
+load_dotenv()
 
-set_verbose(True)  # Mensajes de depuración desactivados
-vectorial_db = VectorialDB()
+API_URL = os.getenv("API_DATABASE_VECTORIAL_URL")
+ENDPOINTS = {
+    "base": "/db_vectorial",
+    "list": "/list",
+    "search": "/search",
+    "exists": "/exists",
+}
 
 
 @tool
-def list_databases():
+def exists_database(database_name: str) -> str:
+    """Check if a vector database exists."""
+    url = urljoin(API_URL, f"{ENDPOINTS['base']}{ENDPOINTS['exists']}/{database_name}")
+    return str(requests.get(url).json())
+
+
+@tool
+def list_databases() -> str:
     """List vector databases."""
-    list_databases = vectorial_db.list_vector_stores()
-    dict_list_databases = {i: database for i, database in enumerate(list_databases)}
-    return str(dict_list_databases)
+    url = "http://127.0.0.1:7860/db_vectorial/list"
+    return str(requests.get(url).json())
 
 
 @tool
-def search_database(database_name: str, query: str, k: int = 3, source: str = None):
-    """Search similarity in a vector database.
-
-    Args:
-        database_name (str): Name of the vector database.
-        query (str): Query.
-        k (int, optional): Number of results. Defaults to 3.
-        source (str, optional): Source of the documents. Defaults to None.
-
-    Returns:
-        list: Search results.
-    """
-    try:
-        results = vectorial_db.search_similarity(
-            name=database_name, query=query, k=k, source=source
-        )
-        return str(results)
-    except Exception as e:
-        return str(e)
+def search_database(
+    database_name: str, query: str, k: int = 5, source: str = None
+) -> str:
+    """Search in a vector database."""
+    url = urljoin(API_URL, f"{ENDPOINTS['base']}{ENDPOINTS['search']}")
+    data = {"database_name": database_name, "query": query, "k": k, "source": source}
+    response = requests.post(url, json=data)
+    return str(response.json())

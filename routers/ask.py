@@ -3,7 +3,7 @@ from langchain.globals import set_verbose
 from controller.question import Question
 from model.model_ai import ModelAI
 from tools.duckduckgo import search
-from tools.search_db_vectorial import list_databases, search_database
+from tools.search_db_vectorial import exists_database, list_databases, search_database
 from tools.time import time
 
 set_verbose(True)  # Mensajes de depuración desactivados
@@ -14,7 +14,7 @@ router = APIRouter(
     responses={404: {"description": "No encontrado"}},
 )
 model = ModelAI()
-tools = [time, search]  # , list_databases, search_database]
+tools = [time, search]  # , #list_databases, exists_database, search_database]
 agent_executor = model.agent_executer(tools)
 
 

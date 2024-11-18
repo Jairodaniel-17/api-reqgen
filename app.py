@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from langchain.globals import set_verbose
 from fastapi.middleware.cors import CORSMiddleware
-from routers import ask, api_db_vectorial
+from routers import ask
 
 set_verbose(True)  # Mensajes de depuración desactivados
 
@@ -17,4 +17,8 @@ app.add_middleware(
 )
 
 app.include_router(ask.router, prefix="/api")
-app.include_router(api_db_vectorial.router, prefix="/api")
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="localhost", port=8130)
